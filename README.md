@@ -1,1 +1,1 @@
-# photoTask1
+# Some kind of Photoshop analog)

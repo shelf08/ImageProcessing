@@ -396,7 +396,7 @@ namespace photoTask1
 
                     for (int dx = -2; dx <= 2; dx++)
                     {
-                        if (dx == 0) continue; //
+                        if (dx == 0) continue;
                         Color pixel = bmp.GetPixel(x + dx, y);
                         redValues.Add(pixel.R);
                         greenValues.Add(pixel.G);

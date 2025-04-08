@@ -82,6 +82,7 @@ namespace photoTask1
         private void btnSave_Click(object sender, EventArgs e)
         {
             // Проверяем, есть ли обработанное изображение
+            //
             if (pictureBoxProcessed.Image != null)
             {
                 // Создаем диалог сохранения файла

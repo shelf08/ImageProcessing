@@ -81,19 +81,14 @@ namespace photoTask1
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            // Проверяем, есть ли обработанное изображение
-            //
             if (pictureBoxProcessed.Image != null)
             {
-                // Создаем диалог сохранения файла
                 SaveFileDialog saveDialog = new SaveFileDialog();
                 saveDialog.Filter = "PNG|*.png|JPEG|*.jpg|BMP|*.bmp";
                 saveDialog.Title = "Сохранить изображение";
 
-                // Если пользователь выбрал файл и нажал "Сохранить"
                 if (saveDialog.ShowDialog() == DialogResult.OK)
                 {
-                    // Сохраняем изображение
                     pictureBoxProcessed.Image.Save(saveDialog.FileName);
                     MessageBox.Show("Изображение сохранено!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
@@ -154,25 +149,21 @@ namespace photoTask1
 
         private void btnSP_Click(object sender, EventArgs e)
         {
-            // Проверяем, есть ли изображение в pictureBoxOriginal
             if (pictureBoxOriginal.Image == null)
             {
                 MessageBox.Show("Загрузите изображение сначала.", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            // Пытаемся получить количество пикселей для шума из SPBox
             if (!double.TryParse(SPBox.Text, out double noisePower))
             {
                 MessageBox.Show("Введите корректное количество пикселей (положительное число).", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            // Создаем копию оригинального изображения
             Bitmap bmp = (Bitmap)pictureBoxOriginal.Image;
             Bitmap bmp1 = new Bitmap(bmp.Width, bmp.Height);
 
-            // Копируем оригинальное изображение в noisyImage
             using (Graphics g = Graphics.FromImage(bmp1))
             {
                 g.DrawImage(bmp, 0, 0, bmp.Width, bmp.Height);
@@ -180,34 +171,27 @@ namespace photoTask1
 
             Random random = new Random();
 
-            // Применяем шум "соль-перец"
             for (int i = 0; i < noisePower; i++)
             {
-                // Случайные координаты пикселя
                 int x = random.Next(0, bmp1.Width);
                 int y = random.Next(0, bmp1.Height);
 
-                // Случайный выбор: "соль" (белый) или "перец" (черный)
                 Color noiseColor = random.Next(2) == 0 ? Color.Black : Color.White;
 
-                // Применяем шум к пикселю
                 bmp1.SetPixel(x, y, noiseColor);
             }
 
-            // Отображаем зашумленное изображение в pictureBoxProcessed
             pictureBoxProcessed.Image = bmp1;
             MessageBox.Show("Шум 'соль-перец' добавлен!", "Успех", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
         private void Filter_Click(object sender, EventArgs e)
         {
-            // Проверяем, загружено ли изображение
             if (pictureBoxOriginal.Image == null)
             {
                 MessageBox.Show("Загрузите изображение сначала!");
                 return;
             }
 
-            // Получаем введенный номер маски
             if (!int.TryParse(textBoxMaskNumber.Text, out int maskChoice) || maskChoice < 1 || maskChoice > 6)
             {
                 MessageBox.Show("Введите число от 1 до 6!");
@@ -217,17 +201,14 @@ namespace photoTask1
             Bitmap bmp = (Bitmap)pictureBoxOriginal.Image;
             Bitmap bmp1 = new Bitmap(bmp.Width, bmp.Height);
 
-            // Получаем ядро (маску) в зависимости от выбора
             double[,] kernel = GetKernel(maskChoice);
 
-            // Сумма элементов ядра для нормализации
             double kernelSum = GetKernelSum(kernel);
 
             int x, y;
             int r, g, b;
             Color cl;
 
-            // Итерация по каждому пикселю изображения (исключая границы)
             for (y = 2; y < bmp.Height - 2; ++y)
             {
                 for (x = 2; x < bmp.Width - 2; ++x)
@@ -279,31 +260,24 @@ namespace photoTask1
             switch (choice)
             {
                 case 1:
-                    // Маска 1: w1 = 0.440, w2 = 0.070, w3 = 0.000
                     return CreateKernel(0.440, 0.070, 0.000);
 
                 case 2:
-                    // Маска 2: w1 = 0.270, w2 = 0.000, w3 = 0.005
                     return CreateKernel(0.270, 0.000, 0.005);
 
                 case 3:
-                    // Маска 3: w1 = 0.150, w2 = 0.060, w3 = 0.020
                     return CreateKernel(0.150, 0.060, 0.020);
 
                 case 4:
-                    // Маска 4: w1 = 0.100, w2 = 0.060, w3 = 0.020
                     return CreateKernel(0.100, 0.060, 0.020);
 
                 case 5:
-                    // Маска 5: w1 = 0.060, w2 = 0.045, w3 = 0.030
                     return CreateKernel(0.060, 0.045, 0.030);
 
                 case 6:
-                    // Маска 6: w1 = 0.060, w2 = 0.060, w3 = 0.025
                     return CreateKernel(0.060, 0.060, 0.025);
 
                 default:
-                    // По умолчанию возвращаем маску 1
                     return CreateKernel(0.440, 0.070, 0.000);
             }
         }
@@ -408,7 +382,7 @@ namespace photoTask1
                     greenValues.Sort();
                     blueValues.Sort();
 
-                    int medianIndex = redValues.Count/2;
+                    int medianIndex = redValues.Count / 2;
                     Color medianColor = Color.FromArgb(
                         redValues[medianIndex],
                         greenValues[medianIndex],
@@ -421,6 +395,87 @@ namespace photoTask1
             pictureBoxProcessed.Image = resultBmp;
             MessageBox.Show("Медианный фильтр (крест 5x5) применен!", "Готово",
                            MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void ApplyConvolutionFilter(int[,] filter, string filterName)
+        {
+            if (pictureBoxOriginal.Image == null)
+            {
+                MessageBox.Show("Сначала загрузите изображение!", "Ошибка", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            Bitmap bmp = (Bitmap)pictureBoxOriginal.Image;
+            bmp1 = new Bitmap(bmp.Width, bmp.Height);
+
+            int filterWidth = filter.GetLength(1);
+            int filterHeight = filter.GetLength(0);
+            int filterOffset = filterWidth / 2;
+
+            int filterSum = 0;
+            foreach (int value in filter)
+            {
+                filterSum += value;
+            }
+            if (filterSum == 0) filterSum = 1;
+
+            for (int y = filterOffset; y < bmp.Height - filterOffset; y++)
+            {
+                for (int x = filterOffset; x < bmp.Width - filterOffset; x++)
+                {
+                    int red = 0, green = 0, blue = 0;
+
+                    for (int fy = 0; fy < filterHeight; fy++)
+                    {
+                        for (int fx = 0; fx < filterWidth; fx++)
+                        {
+                            Color pixel = bmp.GetPixel(x + fx - filterOffset, y + fy - filterOffset);
+                            red += pixel.R * filter[fy, fx];
+                            green += pixel.G * filter[fy, fx];
+                            blue += pixel.B * filter[fy, fx];
+                        }
+                    }
+
+                    red = Math.Max(0, Math.Min(255, red / filterSum));
+                    green = Math.Max(0, Math.Min(255, green / filterSum));
+                    blue = Math.Max(0, Math.Min(255, blue / filterSum));
+
+                    bmp1.SetPixel(x, y, Color.FromArgb(red, green, blue));
+                }
+            }
+
+            pictureBoxProcessed.Image = bmp1;
+            MessageBox.Show($"Фильтр {filterName} применен!", "Готово", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private void Filter1_Click(object sender, EventArgs e)
+        {
+            int[,] filter = {
+        {1, -2, 1},
+        {-2, 5, -2},
+        {1, -2, 1}
+    };
+            ApplyConvolutionFilter(filter, "Готово");
+        }
+
+        private void Filter2_Click(object sender, EventArgs e)
+        {
+            int[,] filter = {
+        {0, -1, 0},
+        {-1, 5, -1},
+        {0, -1, 0}
+    };
+            ApplyConvolutionFilter(filter, "Готово");
+        }
+
+        private void Filter3_Click(object sender, EventArgs e)
+        {
+            int[,] filter = {
+        {-1, -1, -1},
+        {-1, 9, -1},
+        {-1, -1, -1}
+    };
+            ApplyConvolutionFilter(filter, "Готово");
         }
 
         private void SPBox_TextChanged(object sender, EventArgs e)
@@ -452,6 +507,9 @@ namespace photoTask1
 
         }
 
+        private void label2_Click(object sender, EventArgs e)
+        {
 
+        }
     }
 }
